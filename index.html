@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPERATION: PARIS — CLASSIFIED</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--text:#e8e0d0;--red:#c41e3a;--gold:#d4af37;
+  --blue:#2c4a7c;--rdx:#1a1a1a;
+  --mono:'Courier New',Courier,monospace;
+  --serif:Georgia,'Times New Roman',serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--serif);font-size:16px;line-height:1.6;overflow-x:hidden}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:3rem 1.5rem;position:relative;background:radial-gradient(ellipse at center,#0f0f0f 0%,#000 100%)}
+#hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);pointer-events:none;z-index:1}
+#hero>*{position:relative;z-index:2}
+.cls-badge{font-family:var(--mono);font-size:.6rem;letter-spacing:.3em;color:var(--red);border:1px solid var(--red);padding:.25rem .75rem;margin-bottom:2rem;text-transform:uppercase;display:inline-block;animation:fadeInDown .5s ease both}
+.hero-hl{font-family:var(--mono);font-size:clamp(1rem,3.2vw,1.9rem);color:var(--text);max-width:680px;line-height:1.5;margin-bottom:1.5rem;min-height:4em}
+.tw-cursor{display:inline-block;width:2px;height:1.1em;background:var(--gold);vertical-align:text-bottom;animation:blink .8s step-end infinite;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+.hero-sub{font-family:var(--serif);font-size:clamp(.85rem,1.8vw,1rem);color:#777;max-width:520px;margin-bottom:2.5rem;font-style:italic;opacity:0;animation:fadeIn 1s ease 2.2s both}
+.file-hdr{border:1px solid var(--gold);padding:1.5rem 2rem;max-width:580px;width:100%;text-align:left;font-family:var(--mono);font-size:.78rem;position:relative;opacity:0;animation:fadeIn 1s ease 2.7s both;background:rgba(212,175,55,.025)}
+.file-hdr .ts-stamp{position:absolute;top:-13px;right:18px;background:var(--red);color:#fff;font-size:.55rem;letter-spacing:.25em;padding:.2rem .5rem;text-transform:uppercase;font-weight:bold;transform:rotate(1.5deg)}
+.file-hdr .op-name{font-size:1.3rem;color:var(--gold);letter-spacing:.15em;margin-bottom:.8rem;text-transform:uppercase}
+.file-hdr .fr{color:#666;line-height:1.9}
+.file-hdr .fr span{color:var(--text)}
+.file-hdr .fr.note{color:#444;font-size:.7rem;font-style:italic;margin-top:.75rem}
+.hero-body{max-width:620px;font-size:.88rem;color:#888;font-family:var(--mono);line-height:1.75;margin-top:2rem;text-align:left;opacity:0;animation:fadeIn 1s ease 3.2s both}
+.hero-body strong{color:var(--text)}
+.hero-body .warn{border-left:3px solid var(--red);padding-left:1rem;margin-top:1rem;font-style:italic;color:#666}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .65s ease,transform .65s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* SHARED SECTION */
+section{padding:5rem 1.5rem}
+.s-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:.4rem;display:block}
+.s-title{font-family:var(--mono);font-size:clamp(1.2rem,2.8vw,1.9rem);color:var(--text);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.s-sub{font-family:var(--serif);font-size:.95rem;color:#666;font-style:italic;margin-bottom:2.5rem}
+.s-hdr{max-width:900px;margin:0 auto 2.5rem;position:relative}
+.stamp-ovl{position:absolute;top:-4px;right:0;font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--red);border:2px solid var(--red);padding:.2rem .45rem;text-transform:uppercase;transform:rotate(-4deg);opacity:.5;pointer-events:none;user-select:none}
+
+/* DOSSIER / TABS */
+#dossier{background:#050505}
+.tabs-wrap{max-width:900px;margin:0 auto}
+.tab-btns{display:flex;border-bottom:1px solid #2a2a2a}
+.tab-btn{font-family:var(--mono);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:#555;background:#0d0d0d;border:1px solid #2a2a2a;border-bottom:none;padding:.7rem 1.4rem;cursor:pointer;transition:all .2s;position:relative;top:1px;outline:none}
+.tab-btn.active{color:var(--gold);background:#050505;border-color:var(--gold);border-bottom-color:#050505}
+.tab-btn:hover:not(.active){color:var(--text);background:#111}
+.tab-pane{display:none;padding-top:2rem}
+.tab-pane.active{display:block}
+.day-lbl{font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;color:var(--red);text-transform:uppercase;margin-bottom:.2rem}
+.day-tag{font-family:var(--serif);font-style:italic;color:#555;margin-bottom:1.75rem;font-size:.93rem}
+.add-all{display:inline-flex;align-items:center;gap:.45rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);padding:.45rem .9rem;cursor:pointer;background:transparent;margin-bottom:2rem;transition:all .2s}
+.add-all:hover{background:rgba(212,175,55,.08)}
+
+/* TIMELINE */
+.tl{list-style:none;position:relative}
+.tl::before{content:'';position:absolute;left:5.2rem;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,#2a2a2a 8%,#2a2a2a 92%,transparent)}
+.tl-item{display:grid;grid-template-columns:5.2rem 1fr;gap:1.25rem;margin-bottom:2.25rem;position:relative}
+.tl-time{font-family:var(--mono);font-size:.68rem;color:var(--red);text-align:right;padding-top:.2rem;letter-spacing:.04em;line-height:1.4}
+.tl-dot{position:absolute;left:5.2rem;top:.35rem;width:8px;height:8px;border-radius:50%;background:var(--red);transform:translateX(-4px)}
+.tl-dot.d2{background:var(--blue)}
+.tl-body{padding-left:.9rem}
+.tl-name{font-family:var(--mono);font-size:.95rem;color:var(--text);margin-bottom:.15rem;letter-spacing:.04em}
+.tl-addr{font-size:.72rem;color:var(--gold);font-family:var(--mono);margin-bottom:.35rem;opacity:.65}
+.tl-notes{font-size:.88rem;color:#777;font-style:italic;margin-bottom:.65rem;line-height:1.55}
+.cal-btn{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:#444;border:1px solid #2a2a2a;padding:.3rem .65rem;cursor:pointer;background:transparent;text-decoration:none;transition:all .2s}
+.cal-btn:hover{color:var(--text);border-color:#555}
+
+/* MAP */
+#map-section{background:#030303;padding-bottom:2rem}
+.map-ctrls{max-width:900px;margin:0 auto 1rem;display:flex;gap:.4rem;flex-wrap:wrap}
+.map-tog{font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;padding:.38rem .85rem;border:1px solid #333;background:transparent;color:#555;cursor:pointer;transition:all .2s}
+.map-tog:hover{color:var(--text);border-color:#666}
+.map-tog.active-d1{border-color:var(--red);color:var(--red)}
+.map-tog.active-d2{border-color:#4a7cbf;color:#4a7cbf}
+.map-tog.active-both{border-color:var(--gold);color:var(--gold)}
+#field-map{max-width:900px;margin:0 auto;height:480px;border:1px solid #1a1a1a}
+
+/* NARRATIVE */
+#narrative{background:#060606}
+.narr-inner{max-width:700px;margin:0 auto}
+.dos-block{border-left:2px solid rgba(212,175,55,.35);padding:1.25rem 0 1.25rem 1.75rem;margin-bottom:2.75rem;position:relative}
+.dos-block .ts{font-family:var(--mono);font-size:.65rem;color:var(--red);letter-spacing:.2em;display:block;margin-bottom:.4rem}
+.dos-block h3{font-family:var(--mono);font-size:.88rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem}
+.dos-block p{font-size:.88rem;color:#888;line-height:1.8;font-family:var(--serif)}
+.dos-block p+p{margin-top:.75rem}
+.redacted{background:var(--rdx);color:var(--rdx);cursor:pointer;border-radius:1px;transition:color .35s;padding:0 3px;user-select:none}
+.redacted:hover,.redacted:focus{color:var(--text)}
+.cls-mark{position:absolute;top:.8rem;right:0;font-family:var(--mono);font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:var(--red);border:1.5px solid var(--red);padding:.12rem .35rem;transform:rotate(-6deg);opacity:0;transition:opacity .3s;pointer-events:none}
+.dos-block:hover .cls-mark{opacity:.45}
+.narr-divider{font-family:var(--mono);font-size:.65rem;letter-spacing:.4em;color:#2a2a2a;text-align:center;margin:3rem 0;text-transform:uppercase}
+
+/* MISSION COMPLETE */
+#mission-complete{background:#020202;text-align:center;padding:6rem 2rem}
+.mc-status{font-family:var(--mono);font-size:.6rem;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;margin-bottom:3rem;display:block}
+.mc-text{max-width:620px;margin:0 auto 3.5rem;font-family:var(--serif);font-size:.95rem;color:#777;line-height:1.95}
+.mc-text p{margin-bottom:1.1rem}
+.mc-text .hl{color:var(--text);font-style:italic}
+.burn-btn{font-family:var(--mono);font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:#ff5533;border:2px solid #ff5533;padding:.9rem 2.5rem;background:transparent;cursor:pointer;transition:all .2s}
+.burn-btn:hover{background:rgba(255,85,51,.08);box-shadow:0 0 24px rgba(255,85,51,.25)}
+
+/* BURN OVERLAY */
+.burn-overlay{position:fixed;inset:0;pointer-events:none;z-index:9999;background:linear-gradient(to top,#ff3300 0%,#ff7700 30%,#ffcc00 60%,transparent 100%);transform:translateY(105%);transition:transform 1.8s cubic-bezier(.22,.61,.36,1);opacity:.9}
+body.burning .burn-overlay{transform:translateY(0)}
+body.burning{animation:burnFade 2s ease forwards}
+@keyframes burnFade{0%{filter:none}60%{filter:sepia(.4) brightness(.9)}100%{filter:sepia(1) brightness(.05)}}
+
+footer{background:var(--bg);border-top:1px solid #111;padding:1.5rem;text-align:center;font-family:var(--mono);font-size:.55rem;letter-spacing:.2em;color:#222;text-transform:uppercase}
+
+/* LEAFLET OVERRIDES */
+.leaflet-popup-content-wrapper{background:#0e0e0e;color:var(--text);border:1px solid #2a2a2a;border-radius:0;box-shadow:0 4px 24px rgba(0,0,0,.7)}
+.leaflet-popup-tip{background:#0e0e0e}
+.leaflet-popup-close-button{color:#555 !important}
+.leaflet-popup-content{font-family:var(--mono);font-size:.72rem;line-height:1.65;margin:10px 14px}
+.leaflet-popup-content b{color:var(--gold)}
+.pop-time{color:var(--red);display:block;margin-bottom:.3rem;font-size:.65rem;letter-spacing:.1em}
+.leaflet-popup-content em{color:#666}
+.leaflet-container{background:#060606}
+.leaflet-control-zoom a{background:#111;color:var(--text);border-color:#333}
+.leaflet-control-zoom a:hover{background:#222}
+
+@media(max-width:640px){
+  section{padding:3rem 1rem}
+  .file-hdr{padding:1.1rem 1.25rem}
+  #field-map{height:320px}
+  .stamp-ovl{display:none}
+  .tl::before{left:0}
+  .tl-item{grid-template-columns:1fr;padding-left:.75rem}
+  .tl-time{text-align:left}
+  .tl-dot{left:0;transform:translateX(-4px)}
+}
+
+/* ─── THEME TOGGLE BUTTON ─── */
+#theme-toggle{
+  position:fixed;top:1rem;right:1rem;z-index:5000;
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;
+  background:transparent;border:1px solid currentColor;
+  padding:.3rem .65rem;cursor:pointer;color:var(--text);
+  transition:opacity .2s, color .3s, border-color .3s;opacity:.6;
+}
+#theme-toggle:hover{opacity:1}
+
+/* ─── LIGHT MODE ─── */
+/* Parchment / aged-document palette — not white, "file colour" */
+[data-theme="light"]{
+  --bg:#f0e9da;
+  --text:#1c1810;
+  --red:#a81828;
+  --gold:#8c6a18;
+  --blue:#1a3464;
+  --rdx:#cfc8b8;
+}
+[data-theme="light"] body{background:var(--bg);color:var(--text)}
+
+/* hero */
+[data-theme="light"] #hero{background:radial-gradient(ellipse at center,#ebe3d0 0%,#ddd5be 100%)}
+[data-theme="light"] #hero::after{background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px)}
+[data-theme="light"] .hero-hl{color:var(--text)}
+[data-theme="light"] .hero-sub{color:#7a6e5e}
+[data-theme="light"] .file-hdr{background:rgba(140,106,24,.04)}
+[data-theme="light"] .file-hdr .fr{color:#8a7a62}
+[data-theme="light"] .file-hdr .fr span{color:var(--text)}
+[data-theme="light"] .file-hdr .fr.note{color:#a09078}
+[data-theme="light"] .hero-body{color:#6a5e4a}
+[data-theme="light"] .hero-body strong{color:var(--text)}
+[data-theme="light"] .hero-body .warn{color:#7a6a56; border-left-color:var(--red)}
+
+/* sections */
+[data-theme="light"] #dossier{background:#e8e2d2}
+[data-theme="light"] .s-sub{color:#8a7a60}
+[data-theme="light"] .s-title{color:var(--text)}
+
+/* tabs */
+[data-theme="light"] .tab-btns{border-bottom-color:#c8bfae}
+[data-theme="light"] .tab-btn{background:#ddd7c7;color:#8a7a60;border-color:#c8bfae}
+[data-theme="light"] .tab-btn.active{background:#e8e2d2;border-color:var(--gold);border-bottom-color:#e8e2d2;color:var(--gold)}
+[data-theme="light"] .tab-btn:hover:not(.active){color:var(--text);background:#d5cebc}
+[data-theme="light"] .day-tag{color:#8a7a60}
+[data-theme="light"] .tl::before{background:linear-gradient(to bottom,transparent,#c8bfae 8%,#c8bfae 92%,transparent)}
+[data-theme="light"] .tl-notes{color:#7a6e5e}
+[data-theme="light"] .cal-btn{color:#8a7a60;border-color:#c8bfae}
+[data-theme="light"] .cal-btn:hover{color:var(--text);border-color:#9a8a70}
+
+/* map */
+[data-theme="light"] #map-section{background:#e4dece}
+[data-theme="light"] .map-tog{border-color:#c0b8a6;color:#8a7a60}
+[data-theme="light"] .map-tog:hover{color:var(--text);border-color:#9a8a70}
+[data-theme="light"] #field-map{border-color:#c0b8a6}
+[data-theme="light"] .leaflet-popup-content-wrapper{background:#f5efdf;border-color:#c8bfae;color:var(--text)}
+[data-theme="light"] .leaflet-popup-tip{background:#f5efdf}
+[data-theme="light"] .leaflet-popup-close-button{color:#8a7a60 !important}
+[data-theme="light"] .leaflet-popup-content em{color:#8a7a60}
+[data-theme="light"] .leaflet-container{background:#e4dece}
+[data-theme="light"] .leaflet-control-zoom a{background:#ede6d4;color:var(--text);border-color:#c0b8a6}
+[data-theme="light"] .leaflet-control-zoom a:hover{background:#ddd7c5}
+
+/* narrative */
+[data-theme="light"] #narrative{background:#ede8da}
+[data-theme="light"] .dos-block{border-left-color:rgba(140,106,24,.4)}
+[data-theme="light"] .dos-block p{color:#6a5e50}
+[data-theme="light"] .redacted{background:var(--rdx);color:var(--rdx)}
+[data-theme="light"] .redacted:hover,[data-theme="light"] .redacted:focus{color:var(--text)}
+[data-theme="light"] .narr-divider{color:#c8bfae}
+
+/* mission complete */
+[data-theme="light"] #mission-complete{background:#e6dece}
+[data-theme="light"] .mc-text{color:#7a6e5c}
+[data-theme="light"] .mc-text .hl{color:var(--text)}
+
+/* footer */
+[data-theme="light"] footer{background:#e8e2d2;border-top-color:#c8bfae;color:#a09880}
+</style>
+</head>
+<body>
+<div class="burn-overlay"></div>
+<button id="theme-toggle" onclick="toggleTheme()" title="Toggle day/night mode"></button>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="cls-badge">⬛ CLASSIFICATION: LOCAL EYES ONLY ⬛</div>
+  <h1 class="hero-hl"><span id="tw"></span><span class="tw-cursor"></span></h1>
+  <p class="hero-sub">"Most tourists only ever see the first one. You were not invited here to be a tourist."</p>
+  <div class="file-hdr">
+    <div class="ts-stamp">TOP SECRET</div>
+    <div class="op-name">OPERATION: PARIS</div>
+    <div class="fr">DURATION: <span>48 Hours</span></div>
+    <div class="fr">CLEARANCE LEVEL: <span>Local</span></div>
+    <div class="fr">FILE REF: <span>OP-PAR-2026-0516</span></div>
+    <div class="fr note">This document will self-destruct after the second glass of champagne.</div>
+  </div>
+  <div class="hero-body">
+    <p><strong>OBJECTIVE:</strong> Infiltrate the city that doesn't appear on any map, doesn't show up on TripAdvisor, and would never, under any circumstances, be recommended by your hotel concierge.</p>
+    <p class="warn"><strong>WARNING:</strong> Side effects include chronic Francophilia, an inexplicable urge to day drink, smoke indoors or start a ménage à trois, and a deeply misplaced sense of intellectual superiority that will last approximately three weeks after departure.</p>
+  </div>
+</section>
+
+<!-- ═══ DOSSIER TABS ═══ -->
+<section id="dossier">
+  <div class="s-hdr reveal">
+    <span class="s-label">// INTEL FILE</span>
+    <h2 class="s-title">THE DOSSIER</h2>
+    <p class="s-sub">Your operational schedule. Authorise each mission below.</p>
+    <div class="stamp-ovl">CLASSIFIED</div>
+  </div>
+  <div class="tabs-wrap reveal">
+    <div class="tab-btns">
+      <button class="tab-btn active" data-tab="d1">DAY 1 — INFILTRATION</button>
+      <button class="tab-btn" data-tab="d2">DAY 2 — EXTRACTION</button>
+    </div>
+    <div id="d1" class="tab-pane active">
+      <div class="day-lbl">FRIDAY 15 MAY 2026</div>
+      <p class="day-tag">"Friday is a descent. Morally, geographically, and gastronomically."</p>
+      <button class="add-all" onclick="addAll(1)">📅 ADD ALL TO GOOGLE CALENDAR — DAY 1</button>
+      <ul class="tl" id="tl-d1"></ul>
+    </div>
+    <div id="d2" class="tab-pane">
+      <div class="day-lbl">SATURDAY 16 MAY 2026</div>
+      <p class="day-tag">"Saturday is a breath of air. Comparatively."</p>
+      <button class="add-all" onclick="addAll(2)">📅 ADD ALL TO GOOGLE CALENDAR — DAY 2</button>
+      <ul class="tl" id="tl-d2"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MAP ═══ -->
+<section id="map-section">
+  <div class="s-hdr reveal">
+    <span class="s-label">// FIELD INTELLIGENCE</span>
+    <h2 class="s-title">FIELD MAP: CLASSIFIED</h2>
+    <p class="s-sub">All assets marked. Routes drawn. Act natural.</p>
+    <div class="stamp-ovl">TOP SECRET</div>
+  </div>
+  <div class="map-ctrls reveal">
+    <button class="map-tog active-d1" data-mode="d1">■ DAY 1 — PARIS</button>
+    <button class="map-tog" data-mode="d2">■ DAY 2 — PARIS + REIMS</button>
+    <button class="map-tog" data-mode="both">■ BOTH</button>
+  </div>
+  <div id="field-map" class="reveal"></div>
+</section>
+
+<!-- ═══ NARRATIVE ═══ -->
+<section id="narrative">
+  <div class="s-hdr reveal">
+    <span class="s-label">// DECLASSIFIED REPORT</span>
+    <h2 class="s-title">THE FULL DOSSIER</h2>
+    <p class="s-sub">Redacted passages revealed on hover. Standard protocol.</p>
+    <div class="stamp-ovl">EYES ONLY</div>
+  </div>
+  <div class="narr-inner" id="narr"></div>
+</section>
+
+<!-- ═══ MISSION COMPLETE ═══ -->
+<section id="mission-complete">
+  <span class="mc-status">— MISSION STATUS: COMPLETE —</span>
+  <div class="mc-text reveal">
+    <p>Two days. Two faces of the same city.</p>
+    <p>The official one — built to remind you who is in charge, who has always been in charge, who intends to remain in charge, and to look extraordinarily beautiful while doing so.</p>
+    <p>And <span class="hl">the real one</span> — the one that's been running quietly underneath, for centuries, on its own terms, by its own rules, occasionally breaking the law, always having a better time.</p>
+    <p>Most people who come to Paris only ever see the first one. They leave satisfied.<br>You saw both. You leave differently.</p>
+    <p><em>Burn after reading. Or don't. The French would keep it.</em></p>
+  </div>
+  <button class="burn-btn" onclick="burnDoc()">🗑️ BURN THIS DOCUMENT</button>
+</section>
+
+<footer>OPERATION: PARIS — OP-PAR-2026-0516 — DISTRIBUTION: EYES ONLY — DESTROY AFTER READING</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ─── DATA ──────────────────────────────────────────────────────────────────
+const D1 = [
+  { time:'09:30–11:00', emoji:'🏛', name:'Sciences Po',
+    addr:'27 rue Saint-Guillaume, 75007 Paris',
+    notes:'Private access. Your guide went here. The building smells like ambition and old stone.',
+    ct:'INFILTRATE: Sciences Po 🏛', cs:'20260515T073000Z', ce:'20260515T090000Z',
+    lat:48.8536, lng:2.3175 },
+  { time:'11:15–12:15', emoji:'☕', name:'La Maison Élysée',
+    addr:'88 rue du Faubourg Saint-Honoré, 75008 Paris',
+    notes:'Your cover: a €9 pastry made by the presidential kitchen. The Republican Guard watches. You eat anyway.',
+    ct:'COVER STORY: La Maison Élysée ☕', cs:'20260515T091500Z', ce:'20260515T101500Z',
+    lat:48.8718, lng:2.3119 },
+  { time:'12:30–14:00', emoji:'🍷', name:'La Petite Périgourdine',
+    addr:'39 Rue des Écoles, 75005 Paris',
+    notes:'Foie gras. Duck confit. A carafe of something red and unreasonably good. Reservation needed.',
+    ct:'DEBRIEF: La Petite Périgourdine 🍷', cs:'20260515T103000Z', ce:'20260515T120000Z',
+    lat:48.8498, lng:2.3491 },
+  { time:'14:15–15:15', emoji:'🔫', name:'Musée de la Préfecture de Police',
+    addr:'4 Rue de la Montagne Sainte-Geneviève, 75005 Paris',
+    notes:'Free entry. Zero tourists. Original guillotine components. The handwriting of people who thought they were smarter than the system.',
+    ct:'RECON: Musée de la Préfecture de Police 🔫', cs:'20260515T121500Z', ce:'20260515T131500Z',
+    lat:48.8510, lng:2.3516 },
+  { time:'15:15–15:30', emoji:'🚇', name:'Métro Line 10',
+    addr:'Cardinal Lemoine → Alma-Marceau',
+    notes:'~12 min. Act natural.',
+    ct:'TRANSIT: Métro Line 10 🚇', cs:'20260515T131500Z', ce:'20260515T133000Z',
+    lat:null, lng:null },
+  { time:'15:30–16:00', emoji:'🚽', name:'Les Égouts de Paris',
+    addr:'Esplanade Habib Bourguiba, 75007 Paris',
+    notes:'You will walk through the active sewer system of Paris. The smell is not metaphorical. The gift shop sells soap.',
+    ct:'DESCENT: Les Égouts de Paris 🚽', cs:'20260515T133000Z', ce:'20260515T140000Z',
+    lat:48.8631, lng:2.3054 },
+  { time:'17:00–19:30', emoji:'💀', name:'Les Catacombes',
+    addr:'1 Av. du Colonel Henri Rol-Tanguy, 75014 Paris',
+    notes:'Six million skulls. 300km of tunnels. You\'ll see 1.7 of them. €31. Reservation mandatory.',
+    ct:'DESCEND: Les Catacombes 💀', cs:'20260515T150000Z', ce:'20260515T173000Z',
+    lat:48.8337, lng:2.3326 },
+  { time:'20:00–22:00', emoji:'🍷', name:'Septime La Cave',
+    addr:'3 Rue Basfroi, 75011 Paris',
+    notes:'No reservation. No visible sign. Natural wine. Small plates. Standing room. You\'ve earned it.',
+    ct:'SURFACE: Septime La Cave 🍷', cs:'20260515T180000Z', ce:'20260515T200000Z',
+    lat:48.8531, lng:2.3782 },
+  { time:'22:30–00:30', emoji:'🤘', name:'La Java — Metalcore Party',
+    addr:'105 Rue du Faubourg du Temple, 75010 Paris',
+    notes:'Oldest club in France. Édith Piaf danced here. Charles Aznavour did something less printable. €10 on the door.',
+    ct:'EXTRACTION: La Java — Metalcore 🤘', cs:'20260515T203000Z', ce:'20260515T223000Z',
+    lat:48.8674, lng:2.3643 },
+  { time:'00:30+', emoji:'🎧', name:'Rex Club (optional)',
+    addr:'5 Boulevard Poissonnière, 75002 Paris',
+    notes:'Theos. All night. Until 7am. No judgment. The option exists.',
+    ct:'OPTIONAL ASSET: Rex Club 🎧', cs:'20260515T223000Z', ce:'20260516T050000Z',
+    lat:48.8700, lng:2.3491 }
+];
+
+const D2 = [
+  { time:'10:00–11:30', emoji:'🥞', name:'Holybelly Brunch',
+    addr:'5 Rue Lucien Sampaix, 75010 Paris',
+    notes:'Eggs. Coffee strong enough to reverse last night\'s decisions. Canal Saint-Martin. Locals who look unbothered. They are not unbothered.',
+    ct:'RECOVERY: Holybelly Brunch 🥞', cs:'20260516T080000Z', ce:'20260516T093000Z',
+    lat:48.8710, lng:2.3620 },
+  { time:'11:45–13:00', emoji:'🦒', name:'Jardin des Plantes & Ménagerie',
+    addr:'57 Rue Cuvier, 75005 Paris',
+    notes:'The oldest zoo in the world. Founded 1794. Still running. Slightly melancholy. Magnificent.',
+    ct:'RECON: Jardin des Plantes 🦒', cs:'20260516T094500Z', ce:'20260516T110000Z',
+    lat:48.8433, lng:2.3600 },
+  { time:'13:45', emoji:'🚄', name:'TGV — Gare de l\'Est',
+    addr:'Gare de l\'Est, 75010 Paris',
+    notes:'North. Fast. Forty-five minutes.',
+    ct:'MOBILISE: TGV Gare de l\'Est 🚄', cs:'20260516T114500Z', ce:'20260516T124500Z',
+    lat:48.8767, lng:2.3590 },
+  { time:'15:00–16:15', emoji:'⛪', name:'Cathédrale de Reims',
+    addr:'Place du Cardinal Luçon, 51100 Reims',
+    notes:'Thirty-three kings of France. Three centuries to build. Walk slowly. Feel appropriately small.',
+    ct:'OBSERVE: Cathédrale de Reims ⛪', cs:'20260516T130000Z', ce:'20260516T141500Z',
+    lat:49.2536, lng:4.0328 },
+  { time:'16:15–17:30', emoji:'🥂', name:'Champagne Caves',
+    addr:'Reims city centre, 51100 Reims',
+    notes:'Chalk caves. 10°C. Bottles aging in the dark by the millions. Some will drink. The caves don\'t judge.',
+    ct:'INFILTRATE: Champagne Caves 🥂', cs:'20260516T141500Z', ce:'20260516T153000Z',
+    lat:49.2530, lng:4.0340 },
+  { time:'17:30–19:00', emoji:'🍾', name:'Ma Bouteille S\'Appelle Revient',
+    addr:'1 Boulevard du Général Leclerc, 51100 Reims',
+    notes:'A bar whose name means: my bottle is coming back and there\'s nothing you can do about it.',
+    ct:'FIELD DRINK: Ma Bouteille S\'Appelle Revient 🍾', cs:'20260516T153000Z', ce:'20260516T170000Z',
+    lat:49.2588, lng:4.0317 },
+  { time:'19:30', emoji:'🚄', name:'Train back to Paris',
+    addr:'Reims → Paris Est',
+    notes:'',
+    ct:'RETURN: Train Reims → Paris Est 🚄', cs:'20260516T173000Z', ce:'20260516T183000Z',
+    lat:null, lng:null },
+  { time:'21:30', emoji:'🎭', name:'Crazy Horse',
+    addr:'12 Avenue George V, 75008 Paris',
+    notes:'The most artistically serious cabaret in the world. Yves Saint Laurent designed costumes for it. The French treat desire as an art form because they have never understood why you wouldn\'t.',
+    ct:'FINALE: Crazy Horse 🎭', cs:'20260516T193000Z', ce:'20260516T210000Z',
+    lat:48.8650, lng:2.3034 }
+];
+
+// ─── GOOGLE CALENDAR URL ────────────────────────────────────────────────────
+function calUrl(e) {
+  const p = new URLSearchParams({
+    action:'TEMPLATE',
+    text: e.ct,
+    dates: e.cs + '/' + e.ce,
+    details: e.notes || e.name,
+    location: e.addr
+  });
+  return 'https://calendar.google.com/calendar/render?' + p.toString();
+}
+
+// ─── ICS DOWNLOAD (Add All) ─────────────────────────────────────────────────
+function makeICS(events) {
+  const esc = s => (s||'').replace(/\n/g,'\\n').replace(/,/g,'\\,');
+  let s = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//OPERATION PARIS//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n';
+  events.forEach(e => {
+    s += 'BEGIN:VEVENT\r\n';
+    s += 'DTSTART:' + e.cs + '\r\n';
+    s += 'DTEND:' + e.ce + '\r\n';
+    s += 'SUMMARY:' + esc(e.ct) + '\r\n';
+    s += 'DESCRIPTION:' + esc(e.notes) + '\r\n';
+    s += 'LOCATION:' + esc(e.addr) + '\r\n';
+    s += 'END:VEVENT\r\n';
+  });
+  s += 'END:VCALENDAR';
+  return s;
+}
+
+function addAll(day) {
+  const events = day === 1 ? D1 : D2;
+  const blob = new Blob([makeICS(events)], { type:'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'operation-paris-day' + day + '.ics';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// ─── TIMELINE RENDER ────────────────────────────────────────────────────────
+function renderTimeline(events, id, dotClass) {
+  const ul = document.getElementById(id);
+  ul.innerHTML = events.map(e => `
+    <li class="tl-item">
+      <div class="tl-time">${e.time}</div>
+      <div class="tl-dot ${dotClass}"></div>
+      <div class="tl-body">
+        <div class="tl-name">${e.emoji} ${e.name}</div>
+        ${e.addr ? `<div class="tl-addr">${e.addr}</div>` : ''}
+        ${e.notes ? `<div class="tl-notes">${e.notes}</div>` : ''}
+        <a href="${calUrl(e)}" target="_blank" rel="noopener" class="cal-btn">
+          ▸ AUTHORISE MISSION
+        </a>
+      </div>
+    </li>`).join('');
+}
+
+// ─── TABS ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ─── NARRATIVE ──────────────────────────────────────────────────────────────
+const NARR = [
+  { ts:'[DAY 1 — INFILTRATION // 0930 HRS]', h:'Sciences Po',
+    p:[`The school that has been quietly manufacturing French presidents, career diplomats, Eurocrats, and the occasional glamorous Marxist since 1872. Private access. Your guide went here. The building smells like ambition and old stone. The students look like they are already running something. <span class="redacted">They probably are.</span>`] },
+  { ts:'[1115 HRS]', h:'The Élysée Palace',
+    p:[`Technically, you are having coffee. Officially, you are conducting surveillance of the most powerful residential address in France from inside its own courtyard. Your cover: a €9 pastry called La Marianne — made this morning by the presidential kitchen, named after the female symbol of the French Republic, eaten by you while the Republican Guard watches from fifteen meters away and cannot do anything about it. This is legal. The French designed it this way. <span class="redacted">Nobody knows why.</span>`] },
+  { ts:'[1230 HRS]', h:'La Petite Périgourdine',
+    p:[`Foie gras. Duck confit. A carafe of something red and unreasonably good. The kind of lunch the French deploy as a geopolitical strategy — render your guest immobile, slightly drunk, and <span class="redacted">philosophically open to suggestion</span>. It works. It has always worked. Order the foie gras.`] },
+  { ts:'[1415 HRS]', h:'Musée de la Préfecture de Police',
+    p:[`Three minutes from your table. Free entry. Zero tourists. This is where Paris keeps its paperwork on a century of murderers, forgers, poisoners, anarchists, and people who simply got on the wrong side of the Préfet at the wrong time. Original guillotine components. Actual case files. The handwriting of people who thought they were smarter than the system. Some of them were. <span class="redacted">Spoiler: the system won.</span>`] },
+  { ts:'[1530 HRS]', h:'Les Égouts de Paris',
+    p:[`You will now walk through the active sewer system underneath the 7th arrondissement. The infrastructure that carries everything Paris pretends doesn't exist — silently, efficiently, toward the Seine. The smell is not metaphorical. The experience is genuinely extreme. The gift shop at the end sells soap, which is either a joke <span class="redacted">or the most French thing that has ever happened</span>.`] },
+  { ts:'[1700 HRS]', h:'Les Catacombes',
+    p:[`Twenty meters underground. Six million skulls — arranged in patterns so deliberate and calm they stopped being horrifying approximately two hundred years ago and became something the French just call patrimoine. The tunnels extend for 300 kilometers beneath the city. You will see 1.7 of them. The remaining 298 are illegal to access, actively monitored, and visited every single night by Parisians with headlamps and absolutely no regard for either of those facts. They call themselves cataphiles. <span class="redacted">The police call them something less flattering.</span> Both are correct.`] },
+  { ts:'[2000 HRS]', h:'Septime La Cave',
+    p:[`You surface. You have earned this. Natural wine, small plates, standing room, no reservation, no sign above the door you'd actually notice. The kind of address that exists entirely on word of mouth between people who consider themselves to have slightly better taste than everyone else. In this particular case, <span class="redacted">they are right.</span>`] },
+  { ts:'[2230 HRS]', h:'La Java, Belleville',
+    p:[`105 Rue du Faubourg du Temple. Down the stairs, underneath a covered gallery that smells like 1923 and stale beer and something indefinably correct. The oldest club in France — opened 1923, classified historical monument, Édith Piaf allegedly danced here, Charles Aznavour allegedly did something <span class="redacted">less printable here</span>. Tonight: metalcore. €10 on the door. The crowd is local, loud, and has not thought about tourists once in its collective life. This is the correct environment.`] },
+  { ts:'[0030 HRS — OPTIONAL]', h:'Rex Club',
+    p:[`Techno institution. Theos, all night, 07:00. The kind of place where it is always either the best night of your life or a cautionary tale you tell at dinner parties for years. Possibly both simultaneously. <span class="redacted">No judgment either way.</span> The option exists.`] },
+];
+
+const NARR2 = [
+  { ts:'[DAY 2 — EXTRACTION // 1000 HRS]', h:'Brunch, Near Canal Saint-Martin',
+    p:[`Brunch. Eggs. Coffee strong enough to reverse the previous evening's decisions. The Canal Saint-Martin — iron footbridges, locks that haven't changed since Haussmann, locals sitting outside at 10am with an ease that suggests they have either never worked a day in their lives or have achieved a level of work-life balance that remains clinically impossible in any other country. Both explanations are plausible. <span class="redacted">Neither requires investigation.</span>`] },
+  { ts:'[1145 HRS]', h:'Jardin des Plantes & Ménagerie',
+    p:[`The oldest zoo in the world — founded in 1794, when the Revolution had just guillotined its way through most of its other projects and needed something slightly less violent to do with its energy. Still running. Giant pandas. Orangutans. The particular melancholy of watching a very old institution continue to function <span class="redacted">out of sheer institutional momentum</span>. Magnificent.`] },
+  { ts:'[1345 HRS]', h:'TGV, Gare de l\'Est',
+    p:[`North. Fast. Forty-five minutes.`] },
+  { ts:'[1500 HRS]', h:'Reims',
+    p:[`The cathedral where they crowned thirty-three kings of France. Built over three centuries by people who would never see it finished, for a God they were absolutely certain was watching, for a monarchy that would eventually be abolished <span class="redacted">by the people who paid for it</span>. Walk slowly. Feel appropriately small. This building has seen empires come and go and remains completely unbothered.`] },
+  { ts:'[1615 HRS]', h:'The Champagne Caves',
+    p:[`Underground for the last time. Chalk caves, 10°C, bottles aging in the dark by the millions. Your guide will explain the méthode champenoise with the particular reverence the French reserve for wine, cheese, <span class="redacted">and their own cinema</span>. Some will drink, others will not. The ritual is the same either way. The caves don't judge.`] },
+  { ts:'[1730 HRS]', h:'Ma Bouteille S\'Appelle Revient',
+    p:[`A bar whose name means, roughly, my bottle is coming back and there's nothing you can do about it. Local crowd. Final Reims apéro. The appropriate moment to reflect on what you've seen today <span class="redacted">before the train takes it all away</span>.`] },
+  { ts:'[1930 HRS]', h:'Train back to Paris', p:[] },
+  { ts:'[2130 HRS]', h:'Crazy Horse',
+    p:[
+      `And here, a word about the French.`,
+      `The French are, depending on your perspective, either the most romantic people on earth or the most insufferable — and in practice these are the same thing. They invented the ménage à trois <span class="redacted">and then wrote philosophy about it</span>. They consider seduction a civic skill. They have a word — je ne sais quoi — for the ineffable quality of being attractive that they use so often it has entered every other language on earth, because no other language felt the need to coin it and the French felt the need immediately.`,
+      `Crazy Horse is where all of this becomes literal.`,
+      `The most artistically serious cabaret in the world. The one the French refuse to apologize for because the concept of apologizing for beauty is, to them, frankly barbaric. Precision choreography. Obsessive lighting design. A cast of dancers treated with the same institutional rigor as the Opéra. Yves Saint Laurent designed costumes for it. It is simultaneously the most French thing you can do in this city and the thing most French people have never actually done — because the French, like all cultures, reserve their most iconic exports for foreigners and special occasions.`,
+      `This is a special occasion.`,
+      `It is not raunchy. It is not cheap. It is not what you expect. It is exactly what it says it is: the French, completely seriously, treating desire as an art form, because they have never understood <span class="redacted">why you wouldn't</span>.`,
+      `Uncomfortable. <span class="redacted">In the best possible way.</span>`
+    ] },
+];
+
+function buildNarr() {
+  const c = document.getElementById('narr');
+  const block = (e, i) => {
+    const paras = Array.isArray(e.p) ? e.p : [e.p];
+    return `
+    <div class="dos-block reveal" style="transition-delay:${i * 0.08}s">
+      <div class="cls-mark">CLASSIFIED</div>
+      <span class="ts">${e.ts}</span>
+      <h3>${e.h}</h3>
+      ${paras.map(para => `<p>${para}</p>`).join('')}
+    </div>`;
+  };
+  c.innerHTML =
+    NARR.map(block).join('') +
+    `<div class="narr-divider reveal">— ◆ — DAY 2 — ◆ —</div>` +
+    NARR2.map(block).join('');
+}
+
+// ─── THEME TOGGLE ───────────────────────────────────────────────────────────
+const TILE_DARK  = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png';
+const TILE_LIGHT = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png';
+const TILE_ATTR  = '© <a href="https://www.openstreetmap.org/copyright" style="color:#888">OpenStreetMap</a> © <a href="https://carto.com/attributions" style="color:#888">CARTO</a>';
+
+function updateToggleLabel() {
+  const light = document.documentElement.dataset.theme === 'light';
+  document.getElementById('theme-toggle').textContent = light ? '☾ NIGHT FILE' : '☀ DAY FILE';
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  html.dataset.theme = next;
+  localStorage.setItem('op-paris-theme', next);
+  updateToggleLabel();
+  if (tileLayer && theMap) swapTiles(next);
+}
+
+// init from storage on first load
+(function(){
+  const saved = localStorage.getItem('op-paris-theme');
+  if (saved) document.documentElement.dataset.theme = saved;
+})();
+
+// ─── MAP ────────────────────────────────────────────────────────────────────
+let theMap, tileLayer, d1layers = [], d2layers = [], d1line, d2line, mapMode = 'd1';
+
+function mkIcon(n, color) {
+  return L.divIcon({
+    className:'',
+    html:`<div style="width:24px;height:24px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:9px;font-weight:bold;color:#fff;box-shadow:0 0 10px ${color}55">${n}</div>`,
+    iconSize:[24,24], iconAnchor:[12,12], popupAnchor:[0,-14]
+  });
+}
+
+function swapTiles(theme) {
+  if (tileLayer) theMap.removeLayer(tileLayer);
+  tileLayer = L.tileLayer(theme === 'light' ? TILE_LIGHT : TILE_DARK,
+    { attribution: TILE_ATTR, subdomains:'abcd', maxZoom:19 }
+  ).addTo(theMap);
+  tileLayer.bringToBack();
+}
+
+function initMap() {
+  const theme = document.documentElement.dataset.theme || 'dark';
+  theMap = L.map('field-map', { zoomControl:true, attributionControl:true })
+    .setView([48.8566, 2.3522], 13);
+
+  tileLayer = L.tileLayer(theme === 'light' ? TILE_LIGHT : TILE_DARK, {
+    attribution: TILE_ATTR,
+    subdomains:'abcd', maxZoom:19
+  }).addTo(theMap);
+
+  let n1 = 0;
+  D1.filter(e => e.lat).forEach(e => {
+    n1++;
+    const m = L.marker([e.lat, e.lng], { icon: mkIcon(n1, '#c41e3a') })
+      .bindPopup(`<span class="pop-time">${e.emoji} ${e.time}</span><b>${e.name}</b><br><em>${e.notes || e.addr}</em>`);
+    d1layers.push(m);
+  });
+  d1line = L.polyline(D1.filter(e=>e.lat).map(e=>[e.lat,e.lng]),
+    { color:'#c41e3a', weight:1.5, opacity:.4, dashArray:'5,7' });
+
+  let n2 = 0;
+  D2.filter(e => e.lat).forEach(e => {
+    n2++;
+    const m = L.marker([e.lat, e.lng], { icon: mkIcon(n2, '#3a6bbf') })
+      .bindPopup(`<span class="pop-time">${e.emoji} ${e.time}</span><b>${e.name}</b><br><em>${e.notes || e.addr}</em>`);
+    d2layers.push(m);
+  });
+  d2line = L.polyline(D2.filter(e=>e.lat).map(e=>[e.lat,e.lng]),
+    { color:'#4a7cbf', weight:1.5, opacity:.4, dashArray:'5,7' });
+
+  applyMapMode('d1');
+}
+
+function applyMapMode(mode) {
+  mapMode = mode;
+  d1layers.forEach(m => { try { theMap.removeLayer(m); } catch(e){} });
+  d2layers.forEach(m => { try { theMap.removeLayer(m); } catch(e){} });
+  try { theMap.removeLayer(d1line); } catch(e){}
+  try { theMap.removeLayer(d2line); } catch(e){}
+
+  if (mode === 'd1' || mode === 'both') {
+    d1layers.forEach(m => m.addTo(theMap));
+    d1line.addTo(theMap);
+  }
+  if (mode === 'd2' || mode === 'both') {
+    d2layers.forEach(m => m.addTo(theMap));
+    d2line.addTo(theMap);
+  }
+
+  const coords1 = D1.filter(e=>e.lat).map(e=>[e.lat,e.lng]);
+  const coords2 = D2.filter(e=>e.lat).map(e=>[e.lat,e.lng]);
+  let fit;
+  if (mode === 'd1') fit = coords1;
+  else if (mode === 'd2') fit = coords2;
+  else fit = [...coords1, ...coords2];
+  theMap.fitBounds(L.latLngBounds(fit), { padding:[40,40] });
+}
+
+document.querySelectorAll('.map-tog').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.map-tog').forEach(b =>
+      b.className = b.className.replace(/active-\S+/g,'').trim());
+    const mode = btn.dataset.mode;
+    const cls = mode === 'd1' ? 'active-d1' : mode === 'd2' ? 'active-d2' : 'active-both';
+    btn.classList.add(cls);
+    applyMapMode(mode);
+  });
+});
+
+// ─── BURN ───────────────────────────────────────────────────────────────────
+function burnDoc() {
+  document.body.classList.add('burning');
+  setTimeout(() => location.reload(), 2200);
+}
+
+// ─── TYPEWRITER ─────────────────────────────────────────────────────────────
+function typewrite(el, text, delay, cb) {
+  let i = 0;
+  const tick = () => {
+    el.textContent = text.slice(0, ++i);
+    if (i < text.length) setTimeout(tick, delay);
+    else if (cb) cb();
+  };
+  setTimeout(tick, 600);
+}
+
+// ─── INTERSECTION OBSERVER ──────────────────────────────────────────────────
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if (en.isIntersecting) {
+      en.target.classList.add('visible');
+      revealObs.unobserve(en.target);
+    }
+  });
+}, { threshold: 0.12 });
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  updateToggleLabel();
+  renderTimeline(D1, 'tl-d1', '');
+  renderTimeline(D2, 'tl-d2', 'd2');
+  buildNarr();
+
+  typewrite(document.getElementById('tw'),
+    'Paris is not one city. It is two. This weekend, you get both.', 42);
+
+  // Observe all .reveal elements (including dynamically inserted ones)
+  setTimeout(() => {
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+  }, 100);
+
+  // Init map once section scrolls into view (avoids 0-height init)
+  let mapInit = false;
+  const mapObs = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !mapInit) {
+      mapInit = true;
+      initMap();
+      mapObs.disconnect();
+    }
+  }, { threshold: 0.1 });
+  mapObs.observe(document.getElementById('field-map'));
+});
+</script>
+</body>
+</html>
