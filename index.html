@@ -334,11 +334,6 @@ const D1 = [
     notes:'Free entry. Zero tourists. Original guillotine components. The handwriting of people who thought they were smarter than the system.',
     ct:'RECON: Musée de la Préfecture de Police 🔫', cs:'20260515T120000Z', ce:'20260515T130000Z',
     lat:48.8510, lng:2.3516 },
-  { time:'15:15–17:45', emoji:'💀', name:'Les Catacombes',
-    addr:'1 Av. du Colonel Henri Rol-Tanguy, 75014 Paris',
-    notes:'Six million skulls. 300km of tunnels. You\'ll see 1.7 of them. €31. Reservation mandatory.',
-    ct:'DESCEND: Les Catacombes 💀', cs:'20260515T131500Z', ce:'20260515T154500Z',
-    lat:48.8337, lng:2.3326 },
   { time:'20:00–22:00', emoji:'🍷', name:'Septime La Cave',
     addr:'3 Rue Basfroi, 75011 Paris',
     notes:'No reservation. No visible sign. Natural wine. Small plates. Standing room. You\'ve earned it.',
@@ -349,11 +344,6 @@ const D1 = [
     notes:'Oldest club in France. Édith Piaf danced here. Charles Aznavour did something less printable. €10 on the door.',
     ct:'EXTRACTION: La Java — Metalcore 🤘', cs:'20260515T203000Z', ce:'20260515T223000Z',
     lat:48.8674, lng:2.3643 },
-  { time:'00:30+', emoji:'🎧', name:'Rex Club (optional)',
-    addr:'5 Boulevard Poissonnière, 75002 Paris',
-    notes:'Theos. All night. Until 7am. No judgment. The option exists.',
-    ct:'OPTIONAL ASSET: Rex Club 🎧', cs:'20260515T223000Z', ce:'20260516T050000Z',
-    lat:48.8700, lng:2.3491 }
 ];
 
 const D2 = [
@@ -367,11 +357,6 @@ const D2 = [
     notes:'Your cover: a €9 pastry made by the presidential kitchen. The Republican Guard watches. You eat anyway.',
     ct:'COVER STORY: La Maison Élysée ☕', cs:'20260516T143000Z', ce:'20260516T153000Z',
     lat:48.8718, lng:2.3119 },
-  { time:'21:30', emoji:'🎭', name:'Paradis Latin',
-    addr:'28 Rue du Cardinal Lemoine, 75005 Paris',
-    notes:'The oldest cabaret in Paris, built by Gustave Eiffel. Grand spectacle, Champagne, and the full theatrical weight of French joie de vivre.',
-    ct:'FINALE: Paradis Latin 🎭', cs:'20260516T193000Z', ce:'20260516T210000Z',
-    lat:48.8506, lng:2.3514 }
 ];
 
 // ─── GOOGLE CALENDAR URL ────────────────────────────────────────────────────
@@ -449,14 +434,10 @@ const NARR = [
     p:[`Foie gras. Duck confit. A carafe of something red and unreasonably good. The kind of lunch the French deploy as a geopolitical strategy — render your guest immobile, slightly drunk, and <span class="redacted">philosophically open to suggestion</span>. It works. It has always worked. Order the foie gras.`] },
   { ts:'[1400 HRS]', h:'Musée de la Préfecture de Police',
     p:[`Three minutes from your table. Free entry. Zero tourists. This is where Paris keeps its paperwork on a century of murderers, forgers, poisoners, anarchists, and people who simply got on the wrong side of the Préfet at the wrong time. Original guillotine components. Actual case files. The handwriting of people who thought they were smarter than the system. Some of them were. <span class="redacted">Spoiler: the system won.</span>`] },
-  { ts:'[1515 HRS]', h:'Les Catacombes',
-    p:[`Twenty meters underground. Six million skulls — arranged in patterns so deliberate and calm they stopped being horrifying approximately two hundred years ago and became something the French just call patrimoine. The tunnels extend for 300 kilometers beneath the city. You will see 1.7 of them. The remaining 298 are illegal to access, actively monitored, and visited every single night by Parisians with headlamps and absolutely no regard for either of those facts. They call themselves cataphiles. <span class="redacted">The police call them something less flattering.</span> Both are correct.`] },
   { ts:'[2000 HRS]', h:'Septime La Cave',
     p:[`You surface. You have earned this. Natural wine, small plates, standing room, no reservation, no sign above the door you'd actually notice. The kind of address that exists entirely on word of mouth between people who consider themselves to have slightly better taste than everyone else. In this particular case, <span class="redacted">they are right.</span>`] },
   { ts:'[2230 HRS]', h:'La Java, Belleville',
     p:[`105 Rue du Faubourg du Temple. Down the stairs, underneath a covered gallery that smells like 1923 and stale beer and something indefinably correct. The oldest club in France — opened 1923, classified historical monument, Édith Piaf allegedly danced here, Charles Aznavour allegedly did something <span class="redacted">less printable here</span>. Tonight: metalcore. €10 on the door. The crowd is local, loud, and has not thought about tourists once in its collective life. This is the correct environment.`] },
-  { ts:'[0030 HRS — OPTIONAL]', h:'Rex Club',
-    p:[`Techno institution. Theos, all night, 07:00. The kind of place where it is always either the best night of your life or a cautionary tale you tell at dinner parties for years. Possibly both simultaneously. <span class="redacted">No judgment either way.</span> The option exists.`] },
 ];
 
 const NARR2 = [
@@ -464,16 +445,6 @@ const NARR2 = [
     p:[`The oldest zoo in the world — founded in 1794, when the Revolution had just guillotined its way through most of its other projects and needed something slightly less violent to do with its energy. Still running. Giant pandas. Orangutans. The particular melancholy of watching a very old institution continue to function <span class="redacted">out of sheer institutional momentum</span>. Magnificent.`] },
   { ts:'[1630 HRS]', h:'The Élysée Palace',
     p:[`Technically, you are having coffee. Officially, you are conducting surveillance of the most powerful residential address in France from inside its own courtyard. Your cover: a €9 pastry called La Marianne — made this morning by the presidential kitchen, named after the female symbol of the French Republic, eaten by you while the Republican Guard watches from fifteen meters away and cannot do anything about it. This is legal. The French designed it this way. <span class="redacted">Nobody knows why.</span>`] },
-  { ts:'[2130 HRS]', h:'Paradis Latin',
-    p:[
-      `And here, a word about the French.`,
-      `The French are, depending on your perspective, either the most romantic people on earth or the most insufferable — and in practice these are the same thing. They invented the ménage à trois <span class="redacted">and then wrote philosophy about it</span>. They consider seduction a civic skill. They have a word — je ne sais quoi — for the ineffable quality of being attractive that they use so often it has entered every other language on earth, because no other language felt the need to coin it and the French felt the need immediately.`,
-      `Paradis Latin is where all of this becomes literal.`,
-      `The oldest cabaret in Paris, housed in a building designed by Gustave Eiffel — the same man who built the tower — because of course the French commissioned their great engineer to build a palace of spectacle. Grand sets, feathered costumes, Champagne, and precision choreography staged with the full theatrical weight of people who consider joie de vivre a civic responsibility. It is simultaneously the most French thing you can do in this city and the thing most French people have never actually done — because the French, like all cultures, reserve their most iconic exports for foreigners and special occasions.`,
-      `This is a special occasion.`,
-      `It is not what you expect. It is exactly what it says it is: the French, completely seriously, treating celebration as an art form, because they have never understood <span class="redacted">why you wouldn't</span>.`,
-      `Uncomfortable. <span class="redacted">In the best possible way.</span>`
-    ] },
 ];
 
 function buildNarr() {
